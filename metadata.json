@@ -1,0 +1,8 @@
+{
+  "name": "Le Comptoir Doré — Fournil, Tacos & Épicerie",
+  "description": "Précommandez votre pain frais, vos viennoiseries, tacos maison, chips, snacks et bonbons avec suivi en direct et notifications push.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

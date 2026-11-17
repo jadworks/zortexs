@@ -1,0 +1,245 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Précommande de pains, viennoiseries, tacos, snacks et confiseries.",
+      "type": "object",
+      "properties": {
+        "orderNumber": {
+          "type": "string",
+          "description": "Numéro de commande lisible (ex. CD-1042).",
+          "minLength": 7,
+          "maxLength": 12,
+          "pattern": "^CD-[0-9]{4,8}$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Identifiant Firebase Auth du client.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Nom du client pour le retrait en boutique.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Numéro de téléphone du client.",
+          "minLength": 8,
+          "maxLength": 20,
+          "pattern": "^[0-9+\\s().-]+$"
+        },
+        "pickupSlot": {
+          "type": "string",
+          "description": "Créneau de fournée ou heure de retrait choisie.",
+          "minLength": 3,
+          "maxLength": 60
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Mode de règlement choisi par le client.",
+          "enum": ["online", "in_store"]
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Statut du paiement.",
+          "enum": ["paid", "pending_pickup"]
+        },
+        "stage": {
+          "type": "string",
+          "description": "Étape actuelle de préparation au fournil ou en cuisine.",
+          "enum": ["received", "preparing", "baking", "packing", "ready", "picked_up"]
+        },
+        "estimatedMinutesRemaining": {
+          "type": "integer",
+          "description": "Temps d'attente estimé en minutes jusqu'au retrait."
+        },
+        "estimatedReadyLabel": {
+          "type": "string",
+          "description": "Heure estimée de disponibilité (ex. 17h25).",
+          "minLength": 3,
+          "maxLength": 40
+        },
+        "totalCents": {
+          "type": "integer",
+          "description": "Montant total en centimes d'euro."
+        },
+        "itemCount": {
+          "type": "integer",
+          "description": "Nombre total d'articles dans la commande."
+        },
+        "itemsSummary": {
+          "type": "string",
+          "description": "Résumé lisible des articles commandés.",
+          "minLength": 2,
+          "maxLength": 400
+        },
+        "notes": {
+          "type": "string",
+          "description": "Précisions éventuelles pour la préparation.",
+          "maxLength": 240
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage serveur de création."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage serveur de dernière mise à jour."
+        }
+      },
+      "required": [
+        "orderNumber",
+        "ownerId",
+        "customerName",
+        "customerPhone",
+        "pickupSlot",
+        "paymentMethod",
+        "paymentStatus",
+        "stage",
+        "estimatedMinutesRemaining",
+        "estimatedReadyLabel",
+        "totalCents",
+        "itemCount",
+        "itemsSummary",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OrderItem": {
+      "title": "OrderItem",
+      "description": "Ligne d'article rattachée à une précommande.",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "description": "Identifiant de la commande parente.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Identifiant Firebase Auth du propriétaire de la commande.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Référence du produit.",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nom du produit.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "category": {
+          "type": "string",
+          "description": "Catégorie du produit.",
+          "enum": ["pains", "viennoiseries", "tacos", "snacks", "bonbons"]
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Quantité commandée."
+        },
+        "unitPriceCents": {
+          "type": "integer",
+          "description": "Prix unitaire en centimes d'euro."
+        },
+        "optionsLabel": {
+          "type": "string",
+          "description": "Précisions de taille, cuisson ou sauce.",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage serveur de création."
+        }
+      },
+      "required": [
+        "orderId",
+        "ownerId",
+        "productId",
+        "name",
+        "category",
+        "quantity",
+        "unitPriceCents",
+        "createdAt"
+      ]
+    },
+    "NotificationPreference": {
+      "title": "NotificationPreference",
+      "description": "Préférences de notifications push pour les mises à jour de commande.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Identifiant Firebase Auth de l'utilisateur.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "pushEnabled": {
+          "type": "boolean",
+          "description": "Activation des notifications push navigateur."
+        },
+        "soundEnabled": {
+          "type": "boolean",
+          "description": "Activation du signal sonore lors des changements d'étape."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage serveur de mise à jour."
+        }
+      },
+      "required": ["ownerId", "pushEnabled", "soundEnabled", "updatedAt"]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "Rôle gérant vérifié côté serveur.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"]
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Précommandes clients et suivi des étapes de préparation."
+    },
+    "/orders/{orderId}/items/{itemId}": {
+      "schema": { "$ref": "#/entities/OrderItem" },
+      "description": "Lignes d'articles individuelles appartenant à une précommande."
+    },
+    "/users/{userId}/preferences/{prefId}": {
+      "schema": { "$ref": "#/entities/NotificationPreference" },
+      "description": "Préférences privées de notifications d'un client."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRole" },
+      "description": "Registre des comptes gérants autorisés à faire avancer les étapes du fournil."
+    }
+  }
+}

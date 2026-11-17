@@ -1,0 +1,258 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 0: Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Pillar 3 & Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && request.auth.token.email == 'jad.mahi66@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Pillar 2: Validation Blueprints
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+        'orderNumber',
+        'ownerId',
+        'customerName',
+        'customerPhone',
+        'pickupSlot',
+        'paymentMethod',
+        'paymentStatus',
+        'stage',
+        'estimatedMinutesRemaining',
+        'estimatedReadyLabel',
+        'totalCents',
+        'itemCount',
+        'itemsSummary',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'orderNumber',
+        'ownerId',
+        'customerName',
+        'customerPhone',
+        'pickupSlot',
+        'paymentMethod',
+        'paymentStatus',
+        'stage',
+        'estimatedMinutesRemaining',
+        'estimatedReadyLabel',
+        'totalCents',
+        'itemCount',
+        'itemsSummary',
+        'notes',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.orderNumber is string &&
+      data.orderNumber.size() >= 7 &&
+      data.orderNumber.size() <= 12 &&
+      data.orderNumber.matches('^CD-[0-9]{4,8}$') &&
+      isValidId(data.ownerId) &&
+      data.customerName is string &&
+      data.customerName.size() >= 2 &&
+      data.customerName.size() <= 80 &&
+      data.customerPhone is string &&
+      data.customerPhone.size() >= 8 &&
+      data.customerPhone.size() <= 20 &&
+      data.customerPhone.matches('^[0-9+\\s().-]+$') &&
+      data.pickupSlot is string &&
+      data.pickupSlot.size() >= 3 &&
+      data.pickupSlot.size() <= 60 &&
+      data.paymentMethod in ['online', 'in_store'] &&
+      data.paymentStatus in ['paid', 'pending_pickup'] &&
+      data.stage in ['received', 'preparing', 'baking', 'packing', 'ready', 'picked_up'] &&
+      data.estimatedMinutesRemaining is int &&
+      data.estimatedMinutesRemaining >= 0 &&
+      data.estimatedMinutesRemaining <= 1440 &&
+      data.estimatedReadyLabel is string &&
+      data.estimatedReadyLabel.size() >= 3 &&
+      data.estimatedReadyLabel.size() <= 40 &&
+      data.totalCents is int &&
+      data.totalCents > 0 &&
+      data.totalCents <= 1000000 &&
+      data.itemCount is int &&
+      data.itemCount >= 1 &&
+      data.itemCount <= 200 &&
+      data.itemsSummary is string &&
+      data.itemsSummary.size() >= 2 &&
+      data.itemsSummary.size() <= 400 &&
+      (!('notes' in data) || (data.notes is string && data.notes.size() <= 240)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidOrderItem(data) {
+      return data.keys().hasAll([
+        'orderId',
+        'ownerId',
+        'productId',
+        'name',
+        'category',
+        'quantity',
+        'unitPriceCents',
+        'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'orderId',
+        'ownerId',
+        'productId',
+        'name',
+        'category',
+        'quantity',
+        'unitPriceCents',
+        'optionsLabel',
+        'createdAt'
+      ]) &&
+      isValidId(data.orderId) &&
+      isValidId(data.ownerId) &&
+      isValidId(data.productId) &&
+      data.productId.size() <= 64 &&
+      data.name is string &&
+      data.name.size() >= 2 &&
+      data.name.size() <= 80 &&
+      data.category in ['pains', 'viennoiseries', 'tacos', 'snacks', 'bonbons'] &&
+      data.quantity is int &&
+      data.quantity >= 1 &&
+      data.quantity <= 50 &&
+      data.unitPriceCents is int &&
+      data.unitPriceCents > 0 &&
+      data.unitPriceCents <= 100000 &&
+      (!('optionsLabel' in data) || (data.optionsLabel is string && data.optionsLabel.size() <= 100)) &&
+      data.createdAt is timestamp;
+    }
+
+    function isValidNotificationPreference(data) {
+      return data.keys().hasAll(['ownerId', 'pushEnabled', 'soundEnabled', 'updatedAt']) &&
+      data.keys().hasOnly(['ownerId', 'pushEnabled', 'soundEnabled', 'updatedAt']) &&
+      isValidId(data.ownerId) &&
+      data.pushEnabled is bool &&
+      data.soundEnabled is bool &&
+      data.updatedAt is timestamp;
+    }
+
+    // Orders collection (PII isolated to owner or verified admin)
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId) && isSignedIn() && (existing().ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+        isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().ownerId == request.auth.uid &&
+        incoming().stage == 'received' &&
+        (
+          (incoming().paymentMethod == 'online' && incoming().paymentStatus == 'paid') ||
+          (incoming().paymentMethod == 'in_store' && incoming().paymentStatus == 'pending_pickup')
+        ) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isSignedIn() &&
+        isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().orderNumber == existing().orderNumber &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          (
+            isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'stage',
+              'estimatedMinutesRemaining',
+              'estimatedReadyLabel',
+              'paymentStatus',
+              'updatedAt'
+            ])
+          ) ||
+          (
+            existing().ownerId == request.auth.uid &&
+            existing().stage != 'picked_up' &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['notes', 'pickupSlot', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isAdmin() && isValidId(orderId);
+
+      match /items/{itemId} {
+        allow get: if isValidId(orderId) && isValidId(itemId) && isSignedIn() && (
+          get(/databases/$(database)/documents/orders/$(orderId)).data.ownerId == request.auth.uid ||
+          isAdmin()
+        );
+        allow list: if isValidId(orderId) && isSignedIn() && (
+          resource.data.ownerId == request.auth.uid ||
+          isBootstrappedAdmin()
+        );
+
+        allow create: if isSignedIn() &&
+          isValidId(orderId) &&
+          isValidId(itemId) &&
+          isValidOrderItem(incoming()) &&
+          incoming().orderId == orderId &&
+          incoming().ownerId == request.auth.uid &&
+          incoming().createdAt == request.time &&
+          existsAfter(/databases/$(database)/documents/orders/$(orderId)) &&
+          getAfter(/databases/$(database)/documents/orders/$(orderId)).data.ownerId == request.auth.uid;
+
+        allow update: if false;
+        allow delete: if isAdmin() && isValidId(orderId) && isValidId(itemId);
+      }
+    }
+
+    // Private notification preferences per user
+    match /users/{userId}/preferences/{prefId} {
+      allow get: if isSignedIn() && isValidId(userId) && isValidId(prefId) && (userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+        isValidId(userId) &&
+        isValidId(prefId) &&
+        userId == request.auth.uid &&
+        isValidNotificationPreference(incoming()) &&
+        incoming().ownerId == request.auth.uid &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isSignedIn() &&
+        isValidId(userId) &&
+        isValidId(prefId) &&
+        userId == request.auth.uid &&
+        isValidNotificationPreference(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['pushEnabled', 'soundEnabled', 'updatedAt']);
+
+      allow delete: if false;
+    }
+
+    // Trusted admin lookup
+    match /admins/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && userId == request.auth.uid;
+      allow list, create, update, delete: if false;
+    }
+  }
+}
