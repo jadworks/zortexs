@@ -21,31 +21,31 @@ export const ORDER_STAGES: readonly StageDefinition[] = [
     stepNumber: 1,
     label: 'Commande reçue',
     shortLabel: 'Reçue',
-    description: 'Votre précommande est enregistrée et transmise à l’équipe.',
-    defaultMinutesRemaining: 22,
+    description: 'Votre commande est enregistrée et transmise au comptoir.',
+    defaultMinutesRemaining: 18,
   },
   {
     id: 'preparing',
     stepNumber: 2,
     label: 'En préparation',
     shortLabel: 'Préparation',
-    description: 'Pétrissage du pain, montage des tacos ou préparation de votre sachet.',
-    defaultMinutesRemaining: 15,
+    description: 'Préparation des tacos, sachets de bonbons ou viennoiseries.',
+    defaultMinutesRemaining: 12,
   },
   {
     id: 'baking',
     stepNumber: 3,
-    label: 'Au four & cuisson',
-    shortLabel: 'Cuisson',
-    description: 'Cuisson dorée au fournil ou passage au grill en cours.',
-    defaultMinutesRemaining: 8,
+    label: 'Au grill & chauffe',
+    shortLabel: 'Grill / Chauffe',
+    description: 'Passage au grill pour les tacos, frites dorées ou viennoiseries tièdes.',
+    defaultMinutesRemaining: 7,
   },
   {
     id: 'packing',
     stepNumber: 4,
     label: 'Emballage & contrôle',
     shortLabel: 'Emballage',
-    description: 'Vérification des articles, boissons fraîches et confiseries.',
+    description: 'Mise en sac avec vos boissons fraîches, chips et confiseries.',
     defaultMinutesRemaining: 3,
   },
   {
@@ -67,11 +67,11 @@ export const ORDER_STAGES: readonly StageDefinition[] = [
 ] as const;
 
 export const PICKUP_SLOTS: readonly { id: string; label: string; baseMinutes: number }[] = [
-  { id: 'asap', label: 'Dès que possible (~20 min)', baseMinutes: 20 },
-  { id: 'batch_0730', label: 'Fournée du matin · 07h30', baseMinutes: 25 },
-  { id: 'batch_1200', label: 'Fournée du midi · 12h00', baseMinutes: 25 },
-  { id: 'batch_1700', label: 'Fournée du goûter · 17h00', baseMinutes: 25 },
-  { id: 'batch_1930', label: 'Service du soir · 19h30', baseMinutes: 25 },
+  { id: 'asap', label: 'Dès que possible (~15 min)', baseMinutes: 15 },
+  { id: 'noon', label: 'Pause du midi · 12h15', baseMinutes: 20 },
+  { id: 'school_out', label: 'Sortie d’école · 16h30', baseMinutes: 20 },
+  { id: 'gouter', label: 'Heure du goûter · 17h30', baseMinutes: 20 },
+  { id: 'evening', label: 'Soirée · 20h00', baseMinutes: 20 },
 ];
 
 export function formatEuro(cents: number): string {
@@ -90,6 +90,11 @@ export function formatFrenchTime(date: Date): string {
   return `${hours}h${minutes}`;
 }
 
+export function computeSavingsCents(originalPriceCents: number | undefined, priceCents: number): number {
+  if (!originalPriceCents || originalPriceCents <= priceCents) return 0;
+  return originalPriceCents - priceCents;
+}
+
 export function getStageDefinition(stage: OrderStage): StageDefinition {
   return ORDER_STAGES.find((s) => s.id === stage) ?? ORDER_STAGES[0];
 }
@@ -106,7 +111,7 @@ export function computeStageEstimation(
   stage: OrderStage,
   pickupSlot: string,
   now: Date = new Date(),
-  maxItemPrepMinutes = 18
+  maxItemPrepMinutes = 15
 ): {
   estimatedMinutesRemaining: number;
   estimatedReadyLabel: string;
@@ -133,38 +138,37 @@ export function computeStageEstimation(
 
   let minutes = def.defaultMinutesRemaining;
   if (stage === 'received') {
-    minutes = Math.max(12, Math.min(45, maxItemPrepMinutes + 4));
+    minutes = Math.max(8, Math.min(35, maxItemPrepMinutes + 3));
   }
 
-  // If user selected a specific future batch slot (e.g. "Fournée du matin · 07h30"), keep it visible
   const readyDate = new Date(now.getTime() + minutes * 60_000);
   const clockLabel = `Vers ${formatFrenchTime(readyDate)}`;
 
-  if (pickupSlot.includes('07h30') && stage === 'received') {
+  if (pickupSlot.includes('12h15') && stage === 'received') {
     return {
       estimatedMinutesRemaining: minutes,
-      estimatedReadyLabel: 'Fournée 07h30',
+      estimatedReadyLabel: 'Retrait 12h15',
       progressPercent: clampedProgress,
     };
   }
-  if (pickupSlot.includes('12h00') && stage === 'received') {
+  if (pickupSlot.includes('16h30') && stage === 'received') {
     return {
       estimatedMinutesRemaining: minutes,
-      estimatedReadyLabel: 'Fournée 12h00',
+      estimatedReadyLabel: 'Retrait 16h30',
       progressPercent: clampedProgress,
     };
   }
-  if (pickupSlot.includes('17h00') && stage === 'received') {
+  if (pickupSlot.includes('17h30') && stage === 'received') {
     return {
       estimatedMinutesRemaining: minutes,
-      estimatedReadyLabel: 'Fournée 17h00',
+      estimatedReadyLabel: 'Retrait 17h30',
       progressPercent: clampedProgress,
     };
   }
-  if (pickupSlot.includes('19h30') && stage === 'received') {
+  if (pickupSlot.includes('20h00') && stage === 'received') {
     return {
       estimatedMinutesRemaining: minutes,
-      estimatedReadyLabel: 'Service 19h30',
+      estimatedReadyLabel: 'Retrait 20h00',
       progressPercent: clampedProgress,
     };
   }
@@ -189,7 +193,7 @@ export function calculateCartTotals(items: readonly CartItem[]): {
 } {
   let totalCents = 0;
   let itemCount = 0;
-  let maxPrepMinutes = 10;
+  let maxPrepMinutes = 5;
 
   for (const item of items) {
     totalCents += item.unitPriceCents * item.quantity;

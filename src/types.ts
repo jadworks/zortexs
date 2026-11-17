@@ -1,10 +1,9 @@
 export type CategoryId =
   | 'all'
-  | 'pains'
-  | 'viennoiseries'
   | 'tacos'
   | 'snacks'
-  | 'bonbons';
+  | 'bonbons'
+  | 'viennoiseries';
 
 export type ProductCategory = Exclude<CategoryId, 'all'>;
 
@@ -40,13 +39,13 @@ export const BLUEPRINT_LIMITS = {
 
 export const SHOP_CONTACT = {
   name: 'Le Comptoir Doré',
-  subtitle: 'Fournil, Tacos & Épicerie Gourmande',
+  subtitle: 'Confiserie, Tacos & Snacks de quartier',
   whatsappDisplay: '07 59 80 21 41',
   whatsappRaw: '0759802141',
   whatsappIntl: '33759802141',
   email: 'contact@lecomptoirdore.fr',
   address: '14 Rue de la République, 69002 Lyon',
-  hours: 'Ouvert tous les jours · 06h30 – 22h30',
+  hours: 'Ouvert tous les jours · 10h00 – 22h30',
 } as const;
 
 export interface ProductOptionGroup {
@@ -65,6 +64,9 @@ export interface Product {
   categoryLabel: string;
   description: string;
   priceCents: number;
+  originalPriceCents?: number;
+  promoLabel?: string;
+  isDailyOffer?: boolean;
   imageUrl: string;
   isPreorderFresh: boolean;
   batchInfo?: string;

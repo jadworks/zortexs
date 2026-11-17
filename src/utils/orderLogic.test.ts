@@ -5,6 +5,7 @@ import {
   buildOrderWhatsAppMessage,
   buildWhatsAppUrl,
   calculateCartTotals,
+  computeSavingsCents,
   computeStageEstimation,
   formatEuro,
   formatFrenchTime,
@@ -16,24 +17,25 @@ import { CartItem } from '../types';
 
 const sampleCart: CartItem[] = [
   {
-    cartKey: 'baguette-tradition',
-    productId: 'baguette-tradition',
-    name: 'Baguette de Tradition',
-    category: 'pains',
-    unitPriceCents: 135,
+    cartKey: 'sachet-bonbons-acidules__acidule',
+    productId: 'sachet-bonbons-acidules',
+    name: 'Sachet Bonbons Acidulés (250g)',
+    category: 'bonbons',
+    unitPriceCents: 390,
     quantity: 2,
-    imageUrl: '/src/assets/images/cat_pains_baguettes_1794938993059.jpg',
-    isPreorderFresh: true,
-    prepMinutes: 18,
+    optionsLabel: '100 % Acidulé',
+    imageUrl: '/src/assets/images/cat_bonbons_confiseries_1794938995033.jpg',
+    isPreorderFresh: false,
+    prepMinutes: 5,
   },
   {
     cartKey: 'tacos-m__sauce-algerienne',
-    productId: 'tacos-m',
-    name: 'Tacos Maison M',
+    productId: 'tacos-maison-classique',
+    name: 'French Tacos Grillé',
     category: 'tacos',
     unitPriceCents: 850,
     quantity: 1,
-    optionsLabel: 'Poulet mariné · Sauce Algérienne',
+    optionsLabel: 'Taille M · Poulet · Algérienne',
     imageUrl: '/src/assets/images/cat_french_tacos_1794938993709.jpg',
     isPreorderFresh: false,
     prepMinutes: 14,
@@ -41,16 +43,22 @@ const sampleCart: CartItem[] = [
 ];
 
 test('formatEuro formats cents using French decimal comma and euro sign', () => {
-  assert.equal(formatEuro(135), '1,35 €');
-  assert.equal(formatEuro(1120), '11,20 €');
+  assert.equal(formatEuro(390), '3,90 €');
+  assert.equal(formatEuro(1630), '16,30 €');
   assert.equal(formatEuro(0), '0,00 €');
+});
+
+test('computeSavingsCents computes combo discount savings safely', () => {
+  assert.equal(computeSavingsCents(1150, 950), 200);
+  assert.equal(computeSavingsCents(undefined, 950), 0);
+  assert.equal(computeSavingsCents(800, 950), 0);
 });
 
 test('calculateCartTotals computes total cents, item count, and max prep minutes', () => {
   const totals = calculateCartTotals(sampleCart);
-  assert.equal(totals.totalCents, 1120);
+  assert.equal(totals.totalCents, 1630);
   assert.equal(totals.itemCount, 3);
-  assert.equal(totals.maxPrepMinutes, 18);
+  assert.equal(totals.maxPrepMinutes, 14);
 });
 
 test('getNextStage advances cleanly through preparation pipeline and stops at picked_up', () => {
@@ -62,16 +70,19 @@ test('getNextStage advances cleanly through preparation pipeline and stops at pi
   assert.equal(getNextStage('picked_up'), null);
 });
 
-test('computeStageEstimation computes dynamic clock time and ready labels', () => {
+test('computeStageEstimation computes dynamic clock time and after-school slots', () => {
   const fixedNow = new Date(2026, 10, 17, 14, 10, 0);
   assert.equal(formatFrenchTime(fixedNow), '14h10');
 
-  const bakingEst = computeStageEstimation('baking', 'Dès que possible (~20 min)', fixedNow, 18);
-  assert.equal(bakingEst.estimatedMinutesRemaining, 8);
-  assert.equal(bakingEst.estimatedReadyLabel, 'Vers 14h18');
+  const bakingEst = computeStageEstimation('baking', 'Dès que possible (~15 min)', fixedNow, 15);
+  assert.equal(bakingEst.estimatedMinutesRemaining, 7);
+  assert.equal(bakingEst.estimatedReadyLabel, 'Vers 14h17');
   assert.equal(bakingEst.progressPercent, 50);
 
-  const readyEst = computeStageEstimation('ready', 'Dès que possible (~20 min)', fixedNow, 18);
+  const schoolOut = computeStageEstimation('received', 'Sortie d’école · 16h30', fixedNow, 15);
+  assert.equal(schoolOut.estimatedReadyLabel, 'Retrait 16h30');
+
+  const readyEst = computeStageEstimation('ready', 'Dès que possible (~15 min)', fixedNow, 15);
   assert.equal(readyEst.estimatedMinutesRemaining, 0);
   assert.equal(readyEst.estimatedReadyLabel, 'Disponible maintenant');
   assert.equal(readyEst.progressPercent, 100);
@@ -87,7 +98,7 @@ test('buildItemsSummary summarizes and truncates safely below 400 characters', (
   const summary = buildItemsSummary(sampleCart);
   assert.equal(
     summary,
-    '2x Baguette de Tradition, 1x Tacos Maison M (Poulet mariné · Sauce Algérienne)'
+    '2x Sachet Bonbons Acidulés (250g) (100 % Acidulé), 1x French Tacos Grillé (Taille M · Poulet · Algérienne)'
   );
   assert.ok(summary.length <= 400);
 });
@@ -109,8 +120,8 @@ test('validateCheckoutInput rejects invalid empty fields and accepts valid Frenc
   const good = validateCheckoutInput({
     customerName: 'Camille Laurent',
     customerPhone: '06 12 34 56 78',
-    pickupSlot: 'Fournée du midi · 12h00',
-    notes: 'Baguette bien cuite svp',
+    pickupSlot: 'Sortie d’école · 16h30',
+    notes: 'Tacos sans oignons svp',
     paymentMethod: 'online',
     items: sampleCart,
   });
@@ -121,9 +132,9 @@ test('buildWhatsAppUrl encodes French order details targeting 0759802141', () =>
   const msg = buildOrderWhatsAppMessage({
     orderNumber: 'CD-1042',
     customerName: 'Camille Laurent',
-    pickupSlot: 'Fournée du midi · 12h00',
-    itemsSummary: '2x Baguette de Tradition',
-    totalCents: 270,
+    pickupSlot: 'Sortie d’école · 16h30',
+    itemsSummary: '2x Sachet Bonbons Acidulés (250g)',
+    totalCents: 780,
     paymentMethod: 'in_store',
   });
   const url = buildWhatsAppUrl(msg);

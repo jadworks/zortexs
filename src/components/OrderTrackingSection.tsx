@@ -78,7 +78,7 @@ export function OrderTrackingSection({
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
           <div>
             <p className="text-xs font-medium text-amber-800 mb-2">
-              Suivi du fournil &amp; de la cuisine en temps réel
+              Suivi du comptoir &amp; de la cuisine en temps réel
             </p>
             <h2 className="font-display text-3xl font-semibold text-stone-900 [text-wrap:balance]">
               Avancement des précommandes et heures d’achèvement
@@ -125,7 +125,7 @@ export function OrderTrackingSection({
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>{kitchenMode ? 'Mode Fournil : Actif' : 'Vue Fournil (Gérant)'}</span>
+              <span>{kitchenMode ? 'Mode Comptoir : Actif' : 'Vue Comptoir (Gérant)'}</span>
             </button>
 
             {!authLoading &&
@@ -154,7 +154,7 @@ export function OrderTrackingSection({
         {kitchenMode && (
           <div className="mb-6 bg-white border border-stone-300 rounded-xl p-4 text-sm text-stone-700">
             <p className="font-semibold text-stone-900 mb-1">
-              Console Atelier &amp; Fournil activée
+              Console Comptoir &amp; Cuisine activée
             </p>
             <p className="text-xs text-stone-600">
               Faites avancer les commandes étape par étape pour mettre à jour l’heure d’achèvement

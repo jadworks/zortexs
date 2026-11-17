@@ -3,6 +3,7 @@ import { Plus, Search } from 'lucide-react';
 import { CATEGORY_TABS, CATALOG_PRODUCTS } from '../data/catalog';
 import { CategoryId, Product } from '../types';
 import { formatEuro } from '../utils/orderLogic';
+import { DailyOffersBanner } from './DailyOffersBanner';
 import { ProductImage } from './ProductImage';
 
 interface CatalogSectionProps {
@@ -32,9 +33,9 @@ export function CatalogSection({
     );
   });
 
-  const handleAdd = (product: Product) => {
+  const handleAdd = (product: Product, explicitChoiceId?: string) => {
     const defaultChoice = product.optionGroup?.choices[0]?.id;
-    const choiceId = selectedOptions[product.id] ?? defaultChoice;
+    const choiceId = explicitChoiceId ?? selectedOptions[product.id] ?? defaultChoice;
     onAddToCart(product, choiceId);
     setJustAddedId(product.id);
     window.setTimeout(() => {
@@ -45,13 +46,15 @@ export function CatalogSection({
   return (
     <section id="boutique" className="py-12 sm:py-16 bg-white border-b border-stone-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
+        <DailyOffersBanner onAddOffer={handleAdd} />
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div>
             <p className="text-xs font-medium text-amber-800 mb-2">
-              Carte &amp; Épicerie du Comptoir
+              Carte &amp; Confiserie du Comptoir
             </p>
             <h2 className="font-display text-3xl font-semibold text-stone-900 [text-wrap:balance]">
-              Précommandez vos pains, viennoiseries, tacos et snacks
+              Commandez vos bonbons, tacos, chips et goûters
             </h2>
           </div>
 
@@ -69,7 +72,7 @@ export function CatalogSection({
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher baguette, tacos, chips..."
+                placeholder="Rechercher bonbons, tacos, chips..."
                 className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#FAF9F6] border border-stone-300 rounded-lg text-stone-900 placeholder:text-stone-500 focus:outline-none focus:border-stone-900"
               />
             </div>
@@ -151,11 +154,20 @@ export function CatalogSection({
                     <div className="p-5">
                       <div className="flex items-center gap-2 text-xs text-stone-500 mb-1.5">
                         <span>{product.categoryLabel}</span>
-                        {product.batchInfo && (
+                        {product.promoLabel ? (
                           <>
                             <span aria-hidden="true">·</span>
-                            <span>{product.batchInfo}</span>
+                            <span className="font-semibold text-amber-800">
+                              {product.promoLabel}
+                            </span>
                           </>
+                        ) : (
+                          product.batchInfo && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <span>{product.batchInfo}</span>
+                            </>
+                          )
                         )}
                       </div>
 
@@ -163,9 +175,16 @@ export function CatalogSection({
                         <h3 className="text-base font-semibold text-stone-900 leading-snug">
                           {product.name}
                         </h3>
-                        <span className="text-base font-semibold text-stone-900 tabular-nums whitespace-nowrap shrink-0">
-                          {formatEuro(displayPriceCents)}
-                        </span>
+                        <div className="text-right shrink-0 tabular-nums">
+                          {product.originalPriceCents && (
+                            <span className="block text-xs text-stone-400 line-through">
+                              {formatEuro(product.originalPriceCents)}
+                            </span>
+                          )}
+                          <span className="text-base font-semibold text-stone-900 whitespace-nowrap">
+                            {formatEuro(displayPriceCents)}
+                          </span>
+                        </div>
                       </div>
 
                       <p className="text-sm text-stone-600 leading-relaxed mb-4">

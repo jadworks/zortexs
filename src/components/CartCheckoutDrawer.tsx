@@ -110,8 +110,8 @@ export function CartCheckoutDrawer({
             <div className="bg-white border border-stone-200 rounded-xl p-8 text-center">
               <p className="text-base font-medium text-stone-900 mb-2">Votre panier est vide</p>
               <p className="text-sm text-stone-600 mb-5">
-                Ajoutez du pain frais, des viennoiseries, un tacos maison ou des confiseries pour
-                lancer votre précommande.
+                Ajoutez des bonbons, un tacos maison, des chips ou des viennoiseries pour lancer
+                votre précommande.
               </p>
               <button
                 type="button"
@@ -184,7 +184,7 @@ export function CartCheckoutDrawer({
               <form id="checkout-form" onSubmit={handleSubmit} noValidate className="space-y-4">
                 <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-4">
                   <h3 className="text-sm font-semibold text-stone-900">
-                    Coordonnées &amp; créneau de fournée
+                    Coordonnées &amp; heure de retrait
                   </h3>
 
                   <div>
@@ -240,7 +240,7 @@ export function CartCheckoutDrawer({
                       htmlFor="checkout-slot"
                       className="block text-xs font-medium text-stone-700 mb-1"
                     >
-                      Heure de fournée ou retrait souhaitée
+                      Créneau de retrait souhaité
                     </label>
                     <select
                       id="checkout-slot"
@@ -266,7 +266,7 @@ export function CartCheckoutDrawer({
                       htmlFor="checkout-notes"
                       className="block text-xs font-medium text-stone-700 mb-1"
                     >
-                      Précisions cuisson ou sauce (optionnel)
+                      Précisions sauce, boisson ou bonbons (optionnel)
                     </label>
                     <textarea
                       id="checkout-notes"
@@ -274,7 +274,7 @@ export function CartCheckoutDrawer({
                       maxLength={BLUEPRINT_LIMITS.notesMax}
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Ex. Baguette bien cuite, sans oignons dans le tacos..."
+                      placeholder="Ex. Tacos sans oignons, boisson bien fraîche..."
                       className="w-full px-3.5 py-2 text-sm bg-[#FAF9F6] border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:border-stone-900"
                     />
                     {errors.notes && (

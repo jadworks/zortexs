@@ -146,7 +146,7 @@
         "category": {
           "type": "string",
           "description": "Catégorie du produit.",
-          "enum": ["pains", "viennoiseries", "tacos", "snacks", "bonbons"]
+          "enum": ["viennoiseries", "tacos", "snacks", "bonbons"]
         },
         "quantity": {
           "type": "integer",

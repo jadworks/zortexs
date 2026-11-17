@@ -41,8 +41,8 @@ export function LegalModal({ docType, onClose }: LegalModalProps) {
               <h3 className="font-semibold text-stone-900 mb-1">1. Éditeur du site</h3>
               <p>
                 Le présent site est édité par <strong>{SHOP_CONTACT.name}</strong> ({SHOP_CONTACT.subtitle}),
-                commerce de proximité spécialisé en boulangerie, viennoiserie, restauration rapide
-                (French tacos) et épicerie sucrée/salée.
+                commerce de proximité spécialisé en confiserie, bonbons, snacks, boissons fraîches,
+                restauration rapide (French tacos) et viennoiseries du goûter.
               </p>
               <p className="mt-1">
                 Adresse : {SHOP_CONTACT.address}
@@ -94,8 +94,8 @@ export function LegalModal({ docType, onClose }: LegalModalProps) {
                 1. Données collectées et finalité (RGPD)
               </h3>
               <p>
-                Dans le cadre de la précommande de pains, viennoiseries, tacos et articles
-                d’épicerie, {SHOP_CONTACT.name} collecte uniquement les informations strictement
+                Dans le cadre de la précommande de confiseries, tacos, snacks, boissons et
+                viennoiseries, {SHOP_CONTACT.name} collecte uniquement les informations strictement
                 nécessaires : votre nom de retrait, votre numéro de téléphone, le créneau choisi, le
                 détail des articles et le mode de règlement.
               </p>

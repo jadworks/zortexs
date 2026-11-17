@@ -16,8 +16,8 @@ export function Footer({ onOpenLegal }: FooterProps) {
               {SHOP_CONTACT.name}
             </p>
             <p className="text-sm text-stone-400 leading-relaxed max-w-xs">
-              Boulangerie de quartier, viennoiseries pur beurre, tacos maison, chips artisanales et
-              confiseries.
+              Confiserie de quartier, bonbons acidulés, tacos maison, chips artisanales, boissons
+              fraîches et viennoiseries pour le goûter.
             </p>
           </div>
 

@@ -135,7 +135,7 @@ service cloud.firestore {
       data.name is string &&
       data.name.size() >= 2 &&
       data.name.size() <= 80 &&
-      data.category in ['pains', 'viennoiseries', 'tacos', 'snacks', 'bonbons'] &&
+      data.category in ['viennoiseries', 'tacos', 'snacks', 'bonbons'] &&
       data.quantity is int &&
       data.quantity >= 1 &&
       data.quantity <= 50 &&

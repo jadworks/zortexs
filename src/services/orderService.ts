@@ -29,7 +29,7 @@ import {
   getNextStage,
 } from '../utils/orderLogic';
 
-const LOCAL_ORDERS_KEY = 'le_comptoir_dore_orders_v1';
+const LOCAL_ORDERS_KEY = 'le_comptoir_dore_orders_v2';
 const ADMIN_EMAIL = 'jad.mahi66@gmail.com';
 
 export function isUserAdmin(user: User | null): boolean {

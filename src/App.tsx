@@ -228,7 +228,7 @@ export default function App() {
       notifyOrderChange(sample);
     } else {
       const title = 'Le Comptoir Doré · Test de notification';
-      const body = 'Votre fournée de baguettes est au four — prête dans environ 8 minutes.';
+      const body = 'Votre Menu Tacos + Boisson est prêt au comptoir — à tout de suite !';
       triggerBrowserPushNotification(title, body);
       pushToast(title, body);
       playSoftNotificationChime();
@@ -280,7 +280,7 @@ export default function App() {
       <Header cartCount={itemCount} onOpenCart={() => setIsCartOpen(true)} />
 
       <main className="flex-1">
-        <HeroSection onSelectBreadCategory={() => setActiveCategory('pains')} />
+        <HeroSection onSelectPromoCategory={() => setActiveCategory('all')} />
 
         <CatalogSection
           activeCategory={activeCategory}

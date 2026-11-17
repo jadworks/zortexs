@@ -5,10 +5,10 @@ import { buildWhatsAppUrl } from '../utils/orderLogic';
 import { ProductImage } from './ProductImage';
 
 interface HeroSectionProps {
-  onSelectBreadCategory: () => void;
+  onSelectPromoCategory: () => void;
 }
 
-export function HeroSection({ onSelectBreadCategory }: HeroSectionProps) {
+export function HeroSection({ onSelectPromoCategory }: HeroSectionProps) {
   return (
     <section id="accueil" className="border-b border-stone-200 bg-[#FAF9F6]">
       <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-8 pb-10 sm:pt-12 sm:pb-14">
@@ -20,22 +20,22 @@ export function HeroSection({ onSelectBreadCategory }: HeroSectionProps) {
               </p>
 
               <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight text-stone-900 leading-[1.12] [text-wrap:balance] mb-5">
-                Pains chauds, viennoiseries, tacos &amp; gourmandises de quartier
+                Bonbons, tacos grillés, chips &amp; goûters à la sortie de l’école
               </h1>
 
               <p className="text-base sm:text-lg text-stone-600 leading-relaxed max-w-xl mb-8">
-                Réservez votre baguette tradition et vos croissants avant la sortie du four,
-                complétez avec nos French tacos grillés, chips artisanales et bonbons. Réglez en
-                ligne ou directement au comptoir lors du retrait.
+                Composez votre sachet de bonbons acidulés, précommandez un French tacos bien chaud,
+                des chips craquantes ou des viennoiseries tièdes pour le goûter. Payez en ligne ou
+                directement au comptoir lors du retrait.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="#boutique"
-                  onClick={onSelectBreadCategory}
+                  onClick={onSelectPromoCategory}
                   className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-semibold text-white bg-stone-900 rounded-lg hover:bg-stone-800 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
                 >
-                  <span>Précommander une fournée</span>
+                  <span>Voir les offres &amp; la carte</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </a>
 
@@ -52,9 +52,9 @@ export function HeroSection({ onSelectBreadCategory }: HeroSectionProps) {
             </div>
 
             <div className="mt-8 pt-6 border-t border-stone-200 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-stone-600">
-              <span>Fournées 07h30, 12h00 et 17h00</span>
+              <span>Retrait midi, 16h30 &amp; soirée</span>
               <span aria-hidden="true">·</span>
-              <span>Paiement en ligne ou au retrait</span>
+              <span>Paiement en ligne ou au comptoir</span>
               <span aria-hidden="true">·</span>
               <span>Suivi en direct</span>
             </div>
@@ -64,8 +64,8 @@ export function HeroSection({ onSelectBreadCategory }: HeroSectionProps) {
             <div className="h-full min-h-[280px] lg:min-h-[420px] rounded-xl overflow-hidden border border-stone-200 bg-stone-100">
               <ProductImage
                 src={HERO_IMAGE_URL}
-                alt="Comptoir artisanal avec baguettes tradition, croissants dorés et pains au chocolat"
-                title="Le Comptoir Doré — Fournil artisanal"
+                alt="Comptoir de confiserie et snacking de quartier avec bocaux de bonbons, tacos grillés, chips, sodas frais et viennoiseries"
+                title="Le Comptoir Doré — Confiserie & Snacks"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -77,31 +77,31 @@ export function HeroSection({ onSelectBreadCategory }: HeroSectionProps) {
           className="mt-10 pt-8 border-t border-stone-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           <div>
-            <p className="text-xs font-semibold text-amber-800 mb-1">01. Précommande fournil</p>
-            <p className="text-sm font-medium text-stone-900">Pain &amp; viennoiseries chauds</p>
+            <p className="text-xs font-semibold text-amber-800 mb-1">01. Précommande goûter</p>
+            <p className="text-sm font-medium text-stone-900">Bonbons, tacos &amp; snacks</p>
             <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              Choisissez votre créneau de fournée pour garantir la disponibilité à l’heure exacte.
+              Réservez avant la sortie des cours ou la pause du midi pour éviter l’attente.
             </p>
           </div>
           <div>
             <p className="text-xs font-semibold text-amber-800 mb-1">02. Paiement flexible</p>
             <p className="text-sm font-medium text-stone-900">En ligne ou au comptoir</p>
             <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              Réglez à l’avance par carte bancaire ou directement en boutique lors du retrait.
+              Réglez à l’avance par carte ou directement en caisse lors du retrait.
             </p>
           </div>
           <div>
             <p className="text-xs font-semibold text-amber-800 mb-1">03. Suivi &amp; alertes push</p>
             <p className="text-sm font-medium text-stone-900">Étapes et heure estimée</p>
             <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              Visualisez l’avancement (pétrissage, four, emballage) et recevez une alerte dès que c’est prêt.
+              Suivez l’avancement (préparation, grill, emballage) et recevez une alerte dès que c’est prêt.
             </p>
           </div>
           <div>
             <p className="text-xs font-semibold text-amber-800 mb-1">04. Contact direct</p>
             <p className="text-sm font-medium text-stone-900">WhatsApp {SHOP_CONTACT.whatsappDisplay}</p>
             <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              Une demande spéciale sur un tacos ou une grosse commande ? Écrivez-nous en un clic.
+              Une demande spéciale sur un mélange de bonbons ou un tacos ? Écrivez-nous en un clic.
             </p>
           </div>
         </div>
